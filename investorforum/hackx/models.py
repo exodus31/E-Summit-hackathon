@@ -24,7 +24,7 @@ class Investor(models.Model):
     details = models.CharField(max_length=500,default="")
     networth = models.CharField(max_length=1000, default="Not Shared Yet")
     comphold = models.CharField(max_length=1000, default="Not Shared Yet")
-    doifield = models.CharField(max_length=1000, default="General")    
+    invfield = models.CharField(max_length=1000, default="General")    
 
     def __str__(self):
         return self.name

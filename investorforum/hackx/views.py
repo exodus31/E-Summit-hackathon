@@ -103,6 +103,11 @@ def createprof(request, pk):
         if obj is None:
             obj2 = Enterp.objects.get(username=pk)
             obj2.companyname = request.POST.get("companyname")
+            obj2.onldesc = request.POST.get('onldesc')
+            obj2.qpitch = request.POST.get('qpitch')
+            obj2.cfunds = request.POST.get('cfunds')
+            obj2.rfunding = request.POST.get('rfunding')
+            obj2.field = request.POST.get('field')            
             obj2.save()
             return redirect('/')
         else:
