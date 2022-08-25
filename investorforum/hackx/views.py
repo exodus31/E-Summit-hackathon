@@ -1,7 +1,9 @@
+import re
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import Group, User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as dj_login, logout
+from .models import Enterp, Investor
 
 # Create your views here.
 
@@ -29,6 +31,14 @@ def signup_ent(request):
         user_obj=User(username = username, email=email)        
         user_obj.set_password(password)
         user_obj.save()
+        i=1
+        while True:
+                if(Enterp.objects.filter(id=i)):
+                        i=i+1
+                else:
+                        break
+        ent_obj = Enterp.objects.create(id =i, username = username, email = email, name = name)
+        ent_obj.save()
         return redirect('/')
     return render(request, 'signup_ent.html')
 
@@ -50,8 +60,56 @@ def signup_inv(request):
         user_obj.is_staff=True
         user_obj.set_password(password)
         user_obj.save()
+        i=1
+        while True:
+                if(Investor.objects.filter(id=i)):
+                        i=i+1
+                else:
+                        break
+        inv_obj = Investor.objects.create(id =i, username = username, email = email, name = name)
+        inv_obj.save()
         return redirect('/')
     return render(request, 'signup_inv.html')
+
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(username = username, password = password)
+        if user is None:
+            messages.info(request, 'Invalid Credentials')
+            return redirect('/login')                
+        user_obj = Investor.objects.filter(username = username).first()
+        if user_obj is None:
+            user_obj2 = Enterp.objects.get(username = username)
+            dj_login(request, user)
+            if user_obj2.companyname == "":
+                return redirect('/createprof/'+username)          
+            else:
+                return redirect('/')
+        else:
+            user_obj = Investor.objects.get(username = username)
+            dj_login(request, user)
+            if user_obj.details == "":
+                return redirect('/createprof/' + username)
+            else:
+                return redirect('/')        
+    return render(request, 'login.html')
+       
+
+def createprof(request, pk):
+    if request.method == 'POST':                
+        obj = Investor.objects.filter(username = pk).first()
+        if obj is None:
+            obj2 = Enterp.objects.get(username=pk)
+            obj2.companyname = request.POST.get("companyname")
+            obj2.save()
+            return redirect('/')
+        else:
+            obj.details = request.POST.get("details")            
+            obj.save()
+            return redirect('/')
+    return render(request, 'createprof.html')
 
 def logoutuser(request):
     logout(request)
